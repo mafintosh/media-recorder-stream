@@ -4,7 +4,8 @@
   "description": "The Media Recorder API in the browser as a readable stream",
   "main": "index.js",
   "dependencies": {
-    "getusermedia": "^1.3.7"
+    "getusermedia": "^1.3.7",
+    "readable-stream": "^2.1.2"
   },
   "devDependencies": {
     "standard": "^7.1.0"
