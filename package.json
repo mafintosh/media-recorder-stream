@@ -1,6 +1,6 @@
 {
   "name": "media-recorder-stream",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "The Media Recorder API in the browser as a readable stream",
   "main": "index.js",
   "dependencies": {
