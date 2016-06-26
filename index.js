@@ -45,7 +45,7 @@ function createRecordStream (opts) {
 
     r.addEventListener('loadend', function () {
       var buf = Buffer(new Uint8Array(r.result))
-      var i = index - btm - 1
+      var i = index - btm
 
       while (buffer.length < i) buffer.push(null)
       buffer[i] = buf
