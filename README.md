@@ -9,18 +9,18 @@ npm install media-recorder-stream
 ## Usage
 
 ``` js
+var getMedia = require('getusermedia')
 var recorder = require('media-recorder-stream')
 
-var stream = recorder({
-  video: true,
-  audio: false
-})
+getMedia({video: true, audio: true}, function (err, media) {
+  if (err) throw err
 
-stream.on('data', function (data) {
-  console.log('recorded video data:', data)
-})
+  var stream = recorder(media, {interval: 1000})
 
-stream.on('ready', function () {
+  stream.on('data', function (data) {
+    console.log('recorded video data:', data)
+  })
+
   // lets display the recorded video as well
   video.src = URL.createObjectURL(stream.media)
   video.autoplay = true
@@ -30,15 +30,16 @@ stream.on('ready', function () {
 
 ## API
 
-#### `var stream = recorder(options)`
+#### `var stream = recorder(media, options)`
+
+`media` is a [`MediaStream` object](https://developer.mozilla.org/en-US/docs/Web/API/Media_Streams_API)
+from the `getUserMedia` API.
 
 Options include
 
 ``` js
 {
   interval: 1000, // at which ms interval you want to capture video (defaults to 1s)
-  video: true, // do you want to capture video
-  audio: false // do you want to capture audio
 }
 ```
 
@@ -47,10 +48,6 @@ All other options are passed to the Media Recorder constructor
 #### `stream.destroy()`
 
 Will destroy the recording stream
-
-#### `stream.on('ready')`
-
-Emitted when the stream is ready to record. The properties below will be null if accessed before
 
 #### `stream.media`
 

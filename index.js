@@ -1,9 +1,8 @@
 var stream = require('readable-stream')
-var getMedia = require('getusermedia')
 
 module.exports = createRecordStream
 
-function createRecordStream (opts) {
+function createRecordStream (media, opts) {
   if (!opts) opts = {}
 
   var rs = stream.Readable()
@@ -22,20 +21,16 @@ function createRecordStream (opts) {
     if (rs.recorder) rs.recorder.stop()
     if (err) rs.emit('error', err)
     rs.emit('close')
+    rs.recorder = null
+    rs.media = null
   }
 
-  getMedia({video: !!opts.video, audio: !!opts.audio}, function (err, media) {
-    if (err) return rs.destroy(err)
-    if (rs.destroyed) return
-
-    rs.media = media
-    rs.recorder = new window.MediaRecorder(media, opts)
-    rs.recorder.addEventListener('dataavailable', function (ev) {
-      push(ev.data)
-    })
-    rs.recorder.start(opts.interval || 1000)
-    rs.emit('ready')
+  rs.media = media
+  rs.recorder = new window.MediaRecorder(media, opts)
+  rs.recorder.addEventListener('dataavailable', function (ev) {
+    push(ev.data)
   })
+  rs.recorder.start(opts.interval || 1000)
 
   return rs
 

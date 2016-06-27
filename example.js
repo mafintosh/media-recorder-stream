@@ -1,14 +1,18 @@
-var record = require('./')
+var getMedia = require('getusermedia')
+var recorder = require('./')
 
-var stream = record({video: true, audio: false, interval: 1000})
-var video = document.createElement('video')
+getMedia({video: true, audio: true}, function (err, media) {
+  if (err) throw err
 
-stream.on('ready', function () {
-  video.src = window.URL.createObjectURL(stream.media)
+  var stream = recorder(media, {interval: 1000})
+
+  stream.on('data', function (data) {
+    console.log('recorded video data:', data)
+  })
+
+  // lets display the recorded video as well
+  var video = document.createElement('video')
+  video.src = URL.createObjectURL(media)
   video.autoplay = true
   document.body.appendChild(video)
-})
-
-stream.on('data', function (data) {
-  console.log('recording', data)
 })
