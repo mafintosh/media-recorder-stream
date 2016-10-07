@@ -25,6 +25,11 @@ function createRecordStream (media, opts) {
     rs.media = null
   }
 
+  rs.stop = function () {
+    rs.once('data', () => rs.emit('end'))
+    rs.recorder.stop()
+  }
+
   rs.media = media
   rs.recorder = new window.MediaRecorder(media, opts)
   rs.recorder.addEventListener('dataavailable', function (ev) {
