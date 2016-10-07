@@ -26,7 +26,7 @@ function createRecordStream (media, opts) {
   }
 
   rs.stop = function () {
-    rs.once('data', () => rs.emit('end'))
+    rs.once('data', () => rs.push(null))
     rs.recorder.stop()
   }
 
