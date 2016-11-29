@@ -37,6 +37,7 @@ function createRecordStream (media, opts) {
   rs.recorder.addEventListener('dataavailable', function (ev) {
     push(ev.data)
   })
+  rs.recorder.onstop = () => rs.emit('end')
   rs.recorder.start(opts.interval || 1000)
 
   return rs
