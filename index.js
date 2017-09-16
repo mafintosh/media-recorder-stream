@@ -34,6 +34,7 @@ function createRecordStream (media, opts) {
 
   rs.media = media
   rs.recorder = new window.MediaRecorder(media, opts)
+  if (opts.mono) rs.recorder.audioChannels = 1
   rs.recorder.addEventListener('dataavailable', function (ev) {
     push(ev.data)
   })
