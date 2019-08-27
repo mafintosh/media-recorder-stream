@@ -18,7 +18,7 @@ function createRecordStream (media, opts) {
   rs.destroy = function (err) {
     if (rs.destroyed) return
     rs.destroyed = true
-    if (rs.recorder) rs.recorder.stop()
+    stop()
     if (err) rs.emit('error', err)
     rs.emit('close')
     rs.recorder = null
@@ -29,7 +29,7 @@ function createRecordStream (media, opts) {
     rs.once('data', function () {
       rs.push(null)
     })
-    rs.recorder.stop()
+    stop()
   }
 
   rs.media = media
@@ -40,6 +40,20 @@ function createRecordStream (media, opts) {
   rs.recorder.start(opts.interval || 1000)
 
   return rs
+
+  function stop () {
+    rs.recorder.stop()
+
+    var video = rs.media.getVideoTracks()
+    var audio = rs.media.getAudioTracks()
+
+    video.forEach(trackStop)
+    audio.forEach(trackStop)
+  }
+
+  function trackStop (track) {
+    track.stop()
+  }
 
   function push (blob) {
     var r = new window.FileReader()
