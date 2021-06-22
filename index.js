@@ -1,14 +1,14 @@
-var stream = require('readable-stream')
+const stream = require('readable-stream')
 
 module.exports = createRecordStream
 
 function createRecordStream (media, opts) {
   if (!opts) opts = {}
 
-  var rs = stream.Readable()
-  var top = 0
-  var btm = 0
-  var buffer = []
+  const rs = stream.Readable()
+  let top = 0
+  let btm = 0
+  const buffer = []
 
   rs.recorder = null
   rs.media = null
@@ -44,8 +44,8 @@ function createRecordStream (media, opts) {
   function stop () {
     rs.recorder.stop()
 
-    var video = rs.media.getVideoTracks()
-    var audio = rs.media.getAudioTracks()
+    const video = rs.media.getVideoTracks()
+    const audio = rs.media.getAudioTracks()
 
     video.forEach(trackStop)
     audio.forEach(trackStop)
@@ -56,17 +56,17 @@ function createRecordStream (media, opts) {
   }
 
   function push (blob) {
-    var r = new window.FileReader()
-    var index = top++
+    const r = new window.FileReader()
+    const index = top++
 
     r.addEventListener('loadend', function () {
-      var buf = Buffer(new Uint8Array(r.result))
-      var i = index - btm
+      const buf = Buffer.from(new Uint8Array(r.result))
+      const i = index - btm
 
       while (buffer.length < i) buffer.push(null)
       buffer[i] = buf
       while (buffer.length && buffer[0]) {
-        var next = buffer.shift()
+        const next = buffer.shift()
         btm++
         rs.push(next)
       }

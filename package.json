@@ -1,20 +1,25 @@
 {
   "name": "media-recorder-stream",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "The Media Recorder API in the browser as a readable stream",
   "main": "index.js",
   "dependencies": {
-    "readable-stream": "^2.1.2"
+    "readable-stream": "^3.6.0"
   },
   "devDependencies": {
-    "standard": "^7.1.0"
+    "browserify": "17.0.0",
+    "standard": "^16.0.3",
+    "tape": "5.2.2",
+    "tape-run": "9.0.0"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/mafintosh/media-recorder-stream.git"
   },
   "scripts": {
-    "test": "standard"
+    "lint": "standard",
+    "test": "browserify test.js | tape-run",
+    "validate": "npm run lint && npm test"
   },
   "author": "Mathias Buus (@mafintosh)",
   "license": "MIT",
