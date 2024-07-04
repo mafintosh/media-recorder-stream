@@ -9,13 +9,13 @@ npm install media-recorder-stream
 ## Usage
 
 ``` js
-var getMedia = require('getusermedia')
-var recorder = require('media-recorder-stream')
+const getMedia = require('getusermedia')
+const Recorder = require('media-recorder-stream')
 
 getMedia({video: true, audio: true}, function (err, media) {
   if (err) throw err
 
-  var stream = recorder(media, {interval: 1000})
+  const stream = new Recorder(media, {interval: 1000})
 
   stream.on('data', function (data) {
     console.log('recorded video data:', data)
@@ -30,7 +30,7 @@ getMedia({video: true, audio: true}, function (err, media) {
 
 ## API
 
-#### `var stream = recorder(media, options)`
+#### `const stream = new Recorder(media, options)`
 
 `media` is a [`MediaStream` object](https://developer.mozilla.org/en-US/docs/Web/API/Media_Streams_API)
 from the `getUserMedia` API.

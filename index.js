@@ -1,79 +1,67 @@
-var stream = require('readable-stream')
+const { Readable } = require('streamx')
+const FIFO = require('fast-fifo')
+const b4a = require('b4a')
 
-module.exports = createRecordStream
+module.exports = class MediaRecorderStream extends Readable {
+  constructor (media, opts = {}) {
+    super()
 
-function createRecordStream (media, opts) {
-  if (!opts) opts = {}
-
-  var rs = stream.Readable()
-  var top = 0
-  var btm = 0
-  var buffer = []
-
-  rs.recorder = null
-  rs.media = null
-
-  rs._read = noop
-  rs.destroyed = false
-  rs.destroy = function (err) {
-    if (rs.destroyed) return
-    rs.destroyed = true
-    stop()
-    if (err) rs.emit('error', err)
-    rs.emit('close')
-    rs.recorder = null
-    rs.media = null
+    this.media = media
+    this.queued = new FIFO()
+    this.recorder = null
+    this.stopped = false
+    this.interval = opts.interval || 1000
+    this.options = opts
   }
 
-  rs.stop = function () {
-    rs.once('data', function () {
-      rs.push(null)
-    })
-    stop()
+  _open (cb) {
+    if (this.stopped) {
+      cb(null)
+      return
+    }
+
+    this.recorder = new window.MediaRecorder(this.media, this.options)
+    this.recorder.addEventListener('dataavailable', (ev) => this._queue(ev.data))
+    this.recorder.start(this.interval)
+
+    cb(null)
   }
 
-  rs.media = media
-  rs.recorder = new window.MediaRecorder(media, opts)
-  rs.recorder.addEventListener('dataavailable', function (ev) {
-    push(ev.data)
-  })
-  rs.recorder.start(opts.interval || 1000)
+  _queue (blob) {
+    const next = { buffer: null }
+    this.queued.push(next)
 
-  return rs
+    const r = new window.FileReader()
 
-  function stop () {
-    rs.recorder.stop()
+    r.addEventListener('loadend', () => {
+      next.value = b4a.from(r.result)
 
-    var video = rs.media.getVideoTracks()
-    var audio = rs.media.getAudioTracks()
-
-    video.forEach(trackStop)
-    audio.forEach(trackStop)
-  }
-
-  function trackStop (track) {
-    track.stop()
-  }
-
-  function push (blob) {
-    var r = new window.FileReader()
-    var index = top++
-
-    r.addEventListener('loadend', function () {
-      var buf = Buffer(new Uint8Array(r.result))
-      var i = index - btm
-
-      while (buffer.length < i) buffer.push(null)
-      buffer[i] = buf
-      while (buffer.length && buffer[0]) {
-        var next = buffer.shift()
-        btm++
-        rs.push(next)
+      while (true) {
+        const btm = this.queued.peek()
+        if (!btm || !btm.value) return
+        this.queued.shift()
+        this.push(btm.value)
       }
     })
 
     r.readAsArrayBuffer(blob)
   }
-}
 
-function noop () {}
+  stop () {
+    this.stopped = true
+
+    if (this.recoder === null) {
+      this.push(null)
+      return
+    }
+
+    this.recorder.stop()
+    const video = this.media.getVideoTracks()
+    const audio = this.media.getAudioTracks()
+
+    for (const m of video) m.stop()
+    for (const m of audio) m.stop()
+
+    this.once('data', () => this.push(null))
+  }
+}
